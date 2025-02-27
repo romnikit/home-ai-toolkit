@@ -17,7 +17,7 @@ check_already_processed() {
   if [[ ! -f "${base_name}.txt" || ! -f "${base_name}.srt" ]]; then
     return 1 # .txt OR .srt does not exist.
   else
-    return 1 # .txt AND .srt exists.
+    return 0 # .txt AND .srt exists.
   fi
 }
 
