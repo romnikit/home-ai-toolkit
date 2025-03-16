@@ -5,12 +5,13 @@
 # appropriate Whisper processing jobs (checks for supported media file and appropriate .json file).
 # The expected result is a tree with .txt files (re-)placed.
 
-
 # List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS="mp3 mp4 ogg ts"
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' "
 
 # List of extensions that are not to be processed 100%.
-EXCLUDE_EXTENSIONS="pdf json txt sh doc docx lnk DS_Store"
+EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
+    'js' 'png' 'jpg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' "
+
 
 # Function to check if a .json file exists for the provided media file.
 check_already_processed() {
@@ -51,17 +52,24 @@ clean_generated_files() {
 process_tree() {
   # Iterate over files recursively from the current directory
   find "$1" -type f -print0 | while IFS= read -r -d '' file; do
-    # Get the file extension
-    extension="${file##*.}"
 
-    # Check if the extension is in the ignore list
+    filename="${file##*/}"
+    if [[ "$filename" == "$file" || "$filename" == *.* ]]; then
+      extension="${filename##*.}"
+    else
+      # No extension.
+      continue
+    fi
+
+    if echo "$EXCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
+      continue  # Skip processing if found in exclusion list
+    fi
+
+    # Check if the extension is in the include list
     ignore=true
-    for include_ext in $INCLUDE_EXTENSIONS; do
-      if [[ "$extension" == "$include_ext" ]]; then
+    if echo "$INCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
         ignore=false
-        break
-      fi
-    done
+    fi
 
     if [[ "$ignore" == "false" ]]; then
       # Check if a .txt file with the same name exists
@@ -72,16 +80,7 @@ process_tree() {
         echo ".. : media without .json result."
       fi
     else
-      ignore_silently=false
-      for no_log_ext in $EXCLUDE_EXTENSIONS; do
-        if [ "$extension" = "$no_log_ext" ]; then
-          ignore_silently=true
-          break
-        fi
-      done
-      if [ "$ignore_silently" = "false" ]; then
         echo "Ignoring $file (extension: $extension)"
-      fi
     fi
   done
 }

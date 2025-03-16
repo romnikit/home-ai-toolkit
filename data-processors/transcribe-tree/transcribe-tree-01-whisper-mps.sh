@@ -5,12 +5,13 @@
 # (has no generated .txt/.srt with the same name) it tries to generate the transcribation.
 # Note, that only .txt and .srt transcribation resutls are preserved, other 3 (.vtt, .json, .tsv) are deleted.
 
-
 # List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS="mp3 mp4 ogg ts"
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' "
 
 # List of extensions that are not to be processed 100%.
-EXCLUDE_EXTENSIONS="pdf json txt sh doc docx lnk DS_Store"
+EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
+    'js' 'png' 'jpg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' "
+
 
 # Function to check if a .txt AND .srt files exist with the same name.
 # This signals that we already processed the file with Whisper.
@@ -62,22 +63,36 @@ clean_generated_files() {
 process_tree() {
   # Iterate over files recursively from the current directory
   find "$1" -type f -print0 | while IFS= read -r -d '' file; do
-    # Get the file extension
-    extension="${file##*.}"
 
-    # Check if the extension is in the ignore list
+    # Extract file extension.
+    # Files with no extensions or with known excluded extensions should be totally ignored.
+
+    filename="${file##*/}"
+    if [[ "$filename" == "$file" || "$filename" == *.* ]]; then
+      extension="${filename##*.}"
+    else
+      # No extension.
+      echo -n "."
+      continue
+    fi
+
+    if echo "$EXCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
+      echo -n "."
+      continue  # Skip processing if found in exclusion list
+    fi
+
+    # Check if the extension is in the include list
     ignore=true
-    for include_ext in $INCLUDE_EXTENSIONS; do
-      if [[ "$extension" == "$include_ext" ]]; then
+    if echo "$INCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
+        echo -n "+" # Process...
         ignore=false
-        break
-      fi
-    done
+    fi
 
     if [[ "$ignore" == "false" ]]; then
       # Check if a .txt file with the same name exists
       if check_already_processed "$file"; then
-        echo "Skipping '$file': is already processed"
+        ### echo "Skipping '$file': is already processed"
+        :
       else
         echo "Processing '$file' with Whisper..."
         call_whisper "$file"
@@ -86,16 +101,7 @@ process_tree() {
       # One-time.
       # clean_generated_files "$file" # Clean up after whisper
     else
-      ignore_silently=false
-      for no_log_ext in $EXCLUDE_EXTENSIONS; do
-        if [ "$extension" = "$no_log_ext" ]; then
-          ignore_silently=true
-          break
-        fi
-      done
-      if [ "$ignore_silently" = "false" ]; then
-        echo "Ignoring $file (extension: $extension)"
-      fi
+      echo "Ignoring $file (extension: $extension)"
     fi
   done
 }
