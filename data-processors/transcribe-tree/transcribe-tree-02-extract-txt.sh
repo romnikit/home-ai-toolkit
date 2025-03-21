@@ -14,11 +14,19 @@ EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store
 
 
 # Function to check if a .json file exists for the provided media file.
-check_already_processed() {
-  local file="$1"
-  local base_name="${file%.*}" # Remove extension
-
+check_has_json() {
+  local base_name="$1"
   if [[ ! -f "${base_name}.json" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Function to check if a .txt file exists for the provided media file.
+check_has_txt() {
+  local base_name="$1"
+  if [[ ! -f "${base_name}.txt" ]]; then
     return 1
   else
     return 0
@@ -51,38 +59,51 @@ clean_generated_files() {
 
 process_tree() {
   # Iterate over files recursively from the current directory
+  do_new_line=false
   find "$1" -type f -print0 | while IFS= read -r -d '' file; do
 
-    filename="${file##*/}"
-    if [[ "$filename" == "$file" || "$filename" == *.* ]]; then
-      extension="${filename##*.}"
+    file_name="${file##*/}" # File name without extension
+    if [[ "$file_name" == "$file" || "$file_name" == *.* ]]; then
+      extension="${file_name##*.}"
     else
       # No extension.
+      echo -n "."
+      do_new_line=true
       continue
     fi
 
+    base_name="${file%.*}" # Path + file name but not extension.
+
     if echo "$EXCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
+      echo -n "."
+      do_new_line=true
       continue  # Skip processing if found in exclusion list
     fi
 
     # Check if the extension is in the include list
-    ignore=true
     if echo "$INCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
-        ignore=false
-    fi
 
-    if [[ "$ignore" == "false" ]]; then
       # Check if a .txt file with the same name exists
-      if check_already_processed "$file"; then
-        echo "DO : Extract .txt for '$file' ..."
-        extract_txt "$file"
+      if check_has_json "$base_name"; then
+        if check_has_txt "$base_name"; then
+          echo -n "+" # Already has .txt.
+          do_new_line=true
+        else
+          if $do_new_line; then
+            echo
+            do_new_line=false
+          fi
+          echo "DO : Extract .txt for '$file' ..."
+          extract_txt "$file"
+        fi
       else
-        echo ".. : media without .json result."
+        echo -n "x" # Media but no .json.
+        do_new_line=true
       fi
-    else
-        echo "Ignoring $file (extension: $extension)"
+
     fi
   done
+  echo
 }
 
 ### ===============================================================
