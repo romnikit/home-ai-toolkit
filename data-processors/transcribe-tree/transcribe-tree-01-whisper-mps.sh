@@ -6,11 +6,12 @@
 # Note, that only .txt and .srt transcribation resutls are preserved, other 3 (.vtt, .json, .tsv) are deleted.
 
 # List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' "
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' "
+#INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' "
 
 # List of extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' "
+    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' "
 
 
 # Function to check if a .txt AND .srt files exist with the same name.
@@ -62,6 +63,7 @@ clean_generated_files() {
 # Folder processing cycle (every foldeer is considered a tree).
 process_tree() {
   # Iterate over files recursively from the current directory
+  do_new_line=false
   find "$1" -type f -print0 | while IFS= read -r -d '' file; do
 
     # Extract file extension.
@@ -73,11 +75,13 @@ process_tree() {
     else
       # No extension.
       echo -n "."
+      do_new_line=true
       continue
     fi
 
     if echo "$EXCLUDE_EXTENSIONS" | grep -q -w -i " '$extension' "; then
       echo -n "."
+      do_new_line=true
       continue  # Skip processing if found in exclusion list
     fi
 
@@ -91,9 +95,15 @@ process_tree() {
     if [[ "$ignore" == "false" ]]; then
       # Check if a .txt file with the same name exists
       if check_already_processed "$file"; then
+        echo -n "+" # Already has .txt.
+        do_new_line=true
         ### echo "Skipping '$file': is already processed"
         :
       else
+        if $do_new_line; then
+          echo
+          do_new_line=false
+        fi
         echo "Processing '$file' with Whisper..."
         call_whisper "$file"
         #clean_generated_files "$file" # Clean up after whisper
@@ -101,6 +111,10 @@ process_tree() {
       # One-time.
       # clean_generated_files "$file" # Clean up after whisper
     else
+      if $do_new_line; then
+        echo
+        do_new_line=false
+      fi
       echo "Ignoring $file (extension: $extension)"
     fi
   done

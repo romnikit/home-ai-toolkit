@@ -6,11 +6,11 @@
 # The expected result is a tree with .txt files (re-)placed.
 
 # List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' "
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' "
 
 # List of extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' "
+    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' "
 
 
 # Function to check if a .json file exists for the provided media file.
@@ -100,7 +100,6 @@ process_tree() {
         echo -n "x" # Media but no .json.
         do_new_line=true
       fi
-
     fi
   done
   echo
