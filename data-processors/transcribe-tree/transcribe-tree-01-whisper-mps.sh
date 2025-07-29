@@ -6,12 +6,12 @@
 # Note, that only .txt and .srt transcribation resutls are preserved, other 3 (.vtt, .json, .tsv) are deleted.
 
 # List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' "
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' "
 #INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' "
 
 # List of extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' "
+    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' 'image' "
 
 
 # Function to check if a .txt AND .srt files exist with the same name.
