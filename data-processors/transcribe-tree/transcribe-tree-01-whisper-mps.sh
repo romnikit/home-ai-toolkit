@@ -5,14 +5,14 @@
 # (has no generated .txt/.srt with the same name) it tries to generate the transcribation.
 # Note, that only .txt and .srt transcribation resutls are preserved, other 3 (.vtt, .json, .tsv) are deleted.
 
-# List of extensions to include (only known to be supported media types).
+# List of the extensions to include (only known to be supported media types).
 INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' "
 #INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' "
 
-# List of extensions that are not to be processed 100%.
+# List of the extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' 'image' "
-
+    'js' 'png' 'jpg' 'jpeg' 'bmp' 'epub' 'fb2' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' \
+    'image' 'webp' 'mhtml' "
 
 # Function to check if a .txt AND .srt files exist with the same name.
 # This signals that we already processed the file with Whisper.

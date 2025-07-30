@@ -5,12 +5,13 @@
 # appropriate Whisper processing jobs (checks for supported media file and appropriate .json file).
 # The expected result is a tree with .txt files (re-)placed.
 
-# List of extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' "
+# List of the extensions to include (only known to be supported media types).
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' "
 
-# List of extensions that are not to be processed 100%.
+# List of the extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'jpeg' 'epub' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' "
+    'js' 'png' 'jpg' 'jpeg' 'bmp' 'epub' 'fb2' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' \
+    'image' 'webp' 'mhml' "
 
 
 # Function to check if a .json file exists for the provided media file.
