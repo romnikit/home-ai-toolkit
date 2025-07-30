@@ -6,7 +6,7 @@
 # The expected result is a tree with .txt files (re-)placed.
 
 # List of the extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' "
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' 'wmv' "
 
 # List of the extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
