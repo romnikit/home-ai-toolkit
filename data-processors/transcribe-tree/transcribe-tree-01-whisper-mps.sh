@@ -6,7 +6,7 @@
 # Note, that only .txt and .srt transcribation resutls are preserved, other 3 (.vtt, .json, .tsv) are deleted.
 
 # List of the extensions to include (only known to be supported media types).
-INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'ts' 'mp4' 'mov' 'flv' 'avi' 'wmv' "
+INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'm4v' 'ts' 'mp4' 'mov' 'flv' 'avi' 'wmv' "
 #INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' "
 
 # List of the extensions that are not to be processed 100%.
