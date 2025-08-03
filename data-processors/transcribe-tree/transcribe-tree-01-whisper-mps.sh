@@ -11,8 +11,8 @@ INCLUDE_EXTENSIONS=" 'mp3' 'ogg' 'wav' 'm4a' 'm4b' 'aac' 'mkv' 'm4v' 'ts' 'mp4' 
 
 # List of the extensions that are not to be processed 100%.
 EXCLUDE_EXTENSIONS=" 'pdf' 'json' 'txt' 'sh' 'doc' 'docx' 'xlsx' 'lnk' 'ds_store' 'css' 'html' \
-    'js' 'png' 'jpg' 'jpeg' 'bmp' 'epub' 'fb2' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' \
-    'image' 'webp' 'mhtml' "
+    'js' 'png' 'jpg' 'jpeg' 'jfif' 'bmp' 'epub' 'fb2' 'fb3' 'zip' 'db' 'без названия' 'prc' 'webm' 'tgs' 'url' \
+    'image' 'webp' 'mhtml' 'rar' "
 
 # Function to check if a .txt AND .srt files exist with the same name.
 # This signals that we already processed the file with Whisper.
