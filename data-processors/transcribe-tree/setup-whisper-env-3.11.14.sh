@@ -1,8 +1,11 @@
 #!/bin/bash
 
-pyenv local 3.11.11
-python3 -m venv whisper-env-3-11
-source whisper-env-3-11/bin/activate
+# Whisper-mps actually require Python >= 3.10.
+PYTHON_VERSION="3.11.14"
+pyenv install -s $PYTHON_VERSION
+pyenv global $PYTHON_VERSION
+python3 -m venv "whisper-env-$PYTHON_VERSION"
+source "whisper-env-$PYTHON_VERSION/bin/activate"
 
 # At some point I need to free from the moviepy and move whisper-mps to use 2.x.
 pip install -U pip torch torchvision torchaudio moviepy==1.0.3
