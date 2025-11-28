@@ -8,7 +8,7 @@ python3 -m venv "whisper-env-$PYTHON_VERSION"
 source "whisper-env-$PYTHON_VERSION/bin/activate"
 
 # At some point I need to free from the moviepy and move whisper-mps to use 2.x.
-pip install -U pip torch torchvision torchaudio moviepy==1.0.3
+pip install -U pip torch torchvision torchaudio moviepy<3.0.0,>=2.0.0
 
 #pip install -U openai-whisper
 #pip install -U whisper-mps
