@@ -12,4 +12,4 @@ pip install -U pip torch torchvision torchaudio moviepy<3.0.0,>=2.0.0
 
 #pip install -U openai-whisper
 #pip install -U whisper-mps
-pip install git+https://github.com/romnikit/whisper-mps.git
+pip install -U git+https://github.com/romnikit/whisper-mps.git
