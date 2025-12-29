@@ -34,13 +34,16 @@ def already_processed(path: Path) -> bool:
 
 def run_whisper(path: Path) -> None:
     out = path.with_suffix(".json")
-    subprocess.run(
-        ["whisper-mps",
-         "--file-name", str(path),
-         "--model-name", "large-v3-turbo",
-         "--output-file-name", str(out)],
-        check=True
-    )
+    try:
+        subprocess.run(
+            ["whisper-mps",
+             "--file-name", str(path),
+             "--model-name", "large-v3-turbo",
+             "--output-file-name", str(out)],
+            check=True
+        )
+    except:
+        print("ERROR")
 
 def walk(root: Path):
     """Fast scandir-based recursion, yields file Paths."""
