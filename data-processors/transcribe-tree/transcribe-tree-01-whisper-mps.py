@@ -30,12 +30,10 @@ def should_consider(path: Path) -> bool:
     return ext in INCLUDE
 
 def already_processed(path: Path) -> bool:
-    base = path.with_suffix("")  # removes only last suffix
-    return (base.with_suffix(MARKER_EXT)).exists()
+    return (path.with_suffix(MARKER_EXT)).exists()
 
 def run_whisper(path: Path) -> None:
-    base = path.with_suffix("")
-    out = base.with_suffix(".json")
+    out = path.with_suffix(".json")
     subprocess.run(
         ["whisper-mps",
          "--file-name", str(path),
