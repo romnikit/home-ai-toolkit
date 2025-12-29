@@ -73,7 +73,7 @@ def process_tree(root: str) -> None:
         if already_processed(file_path):
             continue
 
-        print(f"Processing '{f}' with Whisper...")
+        print(f"Processing '{file_path}' with Whisper...")
         run_whisper(file_path)
         print()  # end the \r line
 
