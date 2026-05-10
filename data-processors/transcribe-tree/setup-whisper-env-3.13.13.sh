@@ -1,9 +1,12 @@
 #!/bin/bash
 
+# Needed Homebrew packages.
+# brew install xz
+
 # Whisper-mps actually require Python >= 3.10.
-PYTHON_VERSION="3.13.11"
+PYTHON_VERSION="3.13.13"
 pyenv install -s $PYTHON_VERSION
-pyenv global $PYTHON_VERSION
+pyenv shell $PYTHON_VERSION
 python3 -m venv "whisper-env-$PYTHON_VERSION"
 source "whisper-env-$PYTHON_VERSION/bin/activate"
 
