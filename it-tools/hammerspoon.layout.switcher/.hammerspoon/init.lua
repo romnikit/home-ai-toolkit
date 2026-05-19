@@ -47,8 +47,9 @@ controlLayoutTap = hs.eventtap.new({hs.eventtap.event.types.flagsChanged}, funct
     end
     ]]
 
-    -- Only if control was changed and we are under screen sharing.
-    if controlDown ~= lastControlDown and frontApp and frontApp:name() == "Screen Sharing" then
+    -- Only if control was changed and we are under screen sharing or NoMachine session.
+    if controlDown ~= lastControlDown and frontApp and (
+        frontApp:name() == "Screen Sharing" or frontApp:name() == "NoMachine" ) then
 
         -- If Control is pressed
         if controlDown then
