@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+import gc
+import json
+import mlx_whisper
+import mlx.core as mx
 import os
-import subprocess
 from pathlib import Path
 
 # List of the extensions to include (only known to be supported media types).
@@ -35,15 +38,28 @@ def already_processed(path: Path) -> bool:
 def run_whisper(path: Path) -> None:
     out = path.with_suffix(".json")
     try:
-        subprocess.run(
-            ["whisper-mps",
-             "--file-name", str(path),
-             "--model-name", "large-v3-turbo",
-             "--output-file-name", str(out)],
-            check=True
+
+        # 1. Receive transcribation as variable.
+        result = mlx_whisper.transcribe(
+            str(path),
+            path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
+            verbose=False
         )
-    except:
-        print("ERROR")
+
+        # 2. Save directly to the target file (handling spaces & dots flawlessly)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False)
+            #, indent=2)
+
+    except Exception as e:
+        print(f"ERROR transcribing {path.name}: {e}")
+        # raise
+
+    finally:
+        # Unified Memory cleanup.
+        mx.clear_cache()
+        gc.collect()
+
 
 def walk(root: Path):
     """Fast scandir-based recursion, yields file Paths."""
