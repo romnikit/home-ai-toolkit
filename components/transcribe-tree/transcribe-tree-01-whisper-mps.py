@@ -7,14 +7,14 @@ from pathlib import Path
 # List of the extensions to include (only known to be supported media types).
 INCLUDE = {
     "mp3", "ogg", "wav", "m4a", "m4b", "aac",
-    "mkv", "m4v", "ts", "mp4", "mov", "flv", "avi", "wmv",
+    "mkv", "m4v", "ts", "mp4", "mov", "flv", "avi", "wmv", "webm:,
 }
 
 # List of the extensions that are not to be processed 100%.
 EXCLUDE = {
     "pdf", "json", "txt", "sh", "doc", "docx", "xlsx", "lnk", "ds_store", "css", "html",
     "js", "png", "jpg", "jpeg", "jfif", "bmp", "epub", "fb2", "fb3", "zip", "db",
-    "без названия", "prc", "webm", "tgs", "url", "image", "webp", "mhtml", "rar",
+    "без названия", "prc", "tgs", "url", "image", "webp", "mhtml", "rar",
 }
 
 # Choose your marker. Your current script uses .json as "already processed".
