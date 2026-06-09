@@ -12,3 +12,4 @@ python3 -m venv $PYTHON_PATH
 source "$PYTHON_PATH/bin/activate"
 
 pip install -U pip mlx-whisper
+pip install -U ollama
