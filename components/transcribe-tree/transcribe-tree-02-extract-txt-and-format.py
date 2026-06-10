@@ -387,7 +387,7 @@ ABBREVIATIONS = {
     # Dutch-ish
     "dhr.", "mevr.", "mw.", "m.a.w.", "bijv.", "enz.",
     # Russian-ish
-    "т.е.", "т.д.", "т.п.", "т.к.", "г.", "ул.",
+    "т.е.", "т.д.", "т.п.", "т.к.", "н.к.", "г.", "ул.",
 }
 
 
@@ -436,19 +436,27 @@ def split_sentences(text: str) -> list[str]:
     protected = protect_dots(text)
 
     # Capture sentence-ending punctuation plus optional closing quote/bracket.
+    # But for now we use more practical and transcribation-friendlier regexp.
     pattern = re.compile(
-        r'([.!?…]+["\'”’)\]]*)\s+(?=[A-ZА-ЯЁ0-9"\'“‘(\[])'
+        r'([.!?…]+["\'”’)\]]*)\s+(?=\S)'
+        # r'([.!?…]+["\'”’)\]]*)\s+(?=[A-ZА-ЯЁ0-9"\'“‘(\[])'
     )
 
     parts = []
     start = 0
 
+    # print(f"[+] TEXT WITH PROTECTED DOTS:\n{protected}")
     for match in pattern.finditer(protected):
         end = match.end(1)  # keep punctuation/quote/bracket in sentence
-        parts.append(protected[start:end])
+        sentence = protected[start:end]
+        # print(f"[+] SENTENCE: {sentence}")
+        parts.append(sentence)
         start = match.end()  # skip whitespace
 
-    parts.append(protected[start:])
+    sentence = protected[start:]
+    # print(f"[+] SENTENCE: {sentence}")
+    parts.append(sentence)
+    # print("---------------------------------------")
 
     # Recover protected dots.
     sentences = [
