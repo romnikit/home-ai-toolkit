@@ -45,7 +45,7 @@ def run_whisper(path: Path) -> None:
             path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
             #path_or_hf_repo="mlx-community/whisper-large-v3-mlx",
             initial_prompt = (
-                "Use clear punctuation. Keep sentences short."
+                "Keep sentences as short as possible. Use clean punctuation."
             ),
             condition_on_previous_text=False,
             temperature=(0.0, 0.2, 0.4, 0.6),

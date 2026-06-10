@@ -50,7 +50,7 @@ EXCLUDE = {
 
 # Target word count per LLM invocation. This is not a hard limit as if we have no paragraphs detected in buffer
 # and still have segments, we just need a bigger buffer.
-BUFFER_WORD_LIMIT = 1000
+BUFFER_WORD_LIMIT = 500
 
 def check_has_json(base_name: str) -> bool:
     # Equivalent to: [[ -f "${base_name}.json" ]]
