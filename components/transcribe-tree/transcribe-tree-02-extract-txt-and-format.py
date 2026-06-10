@@ -48,6 +48,10 @@ EXCLUDE = {
     "без названия", "prc", "tgs", "url", "image", "webp", "mhtml", "rar",
 }
 
+# Target word count per LLM invocation. This is not a hard limit as if we have no paragraphs detected in buffer
+# and still have segments, we just need a bigger buffer.
+BUFFER_WORD_LIMIT = 1000
+
 def check_has_json(base_name: str) -> bool:
     # Equivalent to: [[ -f "${base_name}.json" ]]
     return os.path.isfile(f"{base_name}.json")
@@ -60,10 +64,6 @@ def check_has_txt(base_name: str) -> bool:
 def start_ollama():
     ensure_model(MODEL_NAME)
 
-
-# Target word count per LLM invocation. This is not a hard limit as if we have no paragraphs detected in buffer
-# and still have segments, we just need a bigger buffer.
-BUFFER_WORD_LIMIT = 1000
 
 def ensure_model(model_name: str):
     """
@@ -99,7 +99,7 @@ def ensure_model(model_name: str):
 # ------------------------------------------------
 #
 
-default_system_prompt = """
+default_system_prompt_old = """
 You are given transcribed input text as numbered lines.
 Your ONLY job is to detect logical pragraphs in this text and point their LAST lines by their numbers.
 The last paragraph ending with the last input text line must not be reported.
@@ -115,6 +115,29 @@ CRITICAL RULES:
 #For each paragraph detected output EXACTLY one line: integer (last paragraph line number) and a short decision explanation.
 #For each paragraph detected output EXACTLY one line: integer (last paragraph line number).
 
+default_system_prompt_02 = """
+Find paragraph breaks in numbered transcript lines.
+
+Output only numbers from the provided list.
+Each number means: this line is the last line of the paragraph.
+
+Output one number per line.
+If there are no paragraph breaks, output nothing.
+"""
+
+default_system_prompt = """
+Find paragraph breaks in numbered transcript lines.
+
+Output only numbers from the provided list.
+Each number means: this line is the last line of the paragraph.
+Output one paragraph break per line with the following line format:
+
+<number>: <short reason>
+
+If there are no paragraph breaks, output nothing.
+"""
+
+#Output line format:
 
 def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> str:
     response = ollama.chat(
@@ -205,6 +228,12 @@ def process_transcript(raw_segments: list):
 
             # 5. Filter and validate indices returned by LLM
             valid_breaks = sorted([int(num) for num in re.findall(r"^(\d+)", model_output, re.MULTILINE)])
+
+            valid_breaks = sorted(
+                int(num)
+                for num in re.findall(r"^(\d+)", model_output, re.MULTILINE)
+                if int(num) < len(prompt_lines)
+            )
             print(f"DETECTED BREAKS: {valid_breaks}")
         else:
             # If we did not get anything new, write out the rest.
@@ -218,9 +247,9 @@ def process_transcript(raw_segments: list):
             # Slice segments up to this break index
             paragraph_segments = current_buffer[start_seg_idx:b]
             paragraph_texts = [s for s in paragraph_segments]
-            # print(f"-> SELECTED: {start_seg_idx}:{b}\n{paragraph_texts}")
+            # print(f"-> SELECTED: {start_seg_idx}:{b}\n{paragraph_texts}", end="")
             formatted_paragraph = format_paragraph(paragraph_texts)
-            print(f"-> PARAGRAPH: {start_seg_idx}:{b}\n{formatted_paragraph}")
+            print(f"-> PARAGRAPH: {start_seg_idx}:{b}\n{formatted_paragraph}", end="")
             final_output += formatted_paragraph
 
             start_seg_idx = b
@@ -450,10 +479,9 @@ def extract_txt(file_path: str) -> None:
     sentences = split_sentences(input_text)
     formatted_result = process_transcript(sentences)
 
-    print("\n--- FINAL OUTPUT ---")
-    print(formatted_result)
-    print("--------------------------------------------------\n\n")
-
+    print("--- FINAL OUTPUT ---------------------------------")
+    print(formatted_result, end="")
+    print("--------------------------------------------------")
     validation = validate_formatting_only(input_text, formatted_result)
 
     if not validation.ok:
