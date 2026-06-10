@@ -132,48 +132,39 @@ def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> s
     return response['message']['content']
     #return json.loads(response['message']['content'])
 
+# Capitalize first letter of the string.
+def capitalize_first(s: str) -> str:
+    s = s.strip()
+    return s[:1].upper() + s[1:] if s else s
+
 def format_paragraph(phrase_list):
+
     """Joins phrases, handles capitalization, and ensures a clean sentence end."""
-    if not phrase_list:
-        return ""
-    # Strip whitespace from individual pieces
-    cleaned_phrases = [p.strip() for p in phrase_list if p.strip()]
-    if not cleaned_phrases:
-        return ""
+    full_text = ""
+    if phrase_list:
+        # Strip whitespace from individual pieces
+        cleaned_phrases = [p.strip() for p in phrase_list if p.strip()]
+        if cleaned_phrases:
 
-    full_text = " ".join(cleaned_phrases)
-    # Safely capitalize the start of the paragraph
-    full_text = full_text[0].upper() + full_text[1:]
+            full_text = " ".join(cleaned_phrases)
+            # Safely capitalize the start of the paragraph
+            full_text = capitalize_first(full_text)
 
-    # Add a period if it doesn't end with sentence-ending punctuation
-    if not full_text.endswith(('.', '!', '?')):
-        full_text += "."
+            # Add a period if it doesn't end with sentence-ending punctuation
+            if not full_text.endswith(('.', '!', '?')):
+                full_text += "."
+            full_text += "\n\n"
 
-    return full_text + "\n\n"
+    return full_text
 
 def process_transcript(raw_segments: list):
 
     final_output = ""
     current_buffer = []
 
-    print(f"Processing {len(raw_segments)} segments...")
+    segments = raw_segments
 
-    current_sentence = ""
-    idx = 0
-    segments = []
-    while idx < len(raw_segments) or current_buffer:
-        if not current_sentence.endswith(('.', '!', '?')):
-            current_sentence += ' ' + raw_segments[idx]['text'].strip()
-            idx += 1
-        else:
-            segments.append(current_sentence)
-            current_sentence = ""
-    if len(current_sentence) > 0:
-        if not current_sentence.endswith(('.', '!', '?')):
-            current_sentence += "."
-        segments.append(current_sentence)
-
-    print(f"Processing {len(segments)} segments ending on sentences...")
+    print(f"Processing {len(segments)} sentences...")
 
     idx = 0
     while idx < len(segments) or current_buffer:
@@ -207,7 +198,7 @@ def process_transcript(raw_segments: list):
             numbered_phrases_text = "\n".join(prompt_lines)
 
             # 4. Call LLM to get paragraph break indices
-            print(f"Processing window of {len(current_buffer)} segments...")
+            print(f"Processing window of {len(current_buffer)} sentence(s)...")
             print(f"<- REQUEST:\n{numbered_phrases_text}\n--------\n")
             model_output = ask_llm_for_breaks(numbered_phrases_text)
             print(f"-> RESPONSE:\n{model_output}\n--------\n")
@@ -227,9 +218,9 @@ def process_transcript(raw_segments: list):
             # Slice segments up to this break index
             paragraph_segments = current_buffer[start_seg_idx:b]
             paragraph_texts = [s for s in paragraph_segments]
-            print(f"-> SELECTED: {start_seg_idx}:{b}\n{paragraph_texts}")
+            # print(f"-> SELECTED: {start_seg_idx}:{b}\n{paragraph_texts}")
             formatted_paragraph = format_paragraph(paragraph_texts)
-            print(f"-> PARAGRAPH: {formatted_paragraph}\n")
+            print(f"-> PARAGRAPH: {start_seg_idx}:{b}\n{formatted_paragraph}")
             final_output += formatted_paragraph
 
             start_seg_idx = b
@@ -325,34 +316,119 @@ def validate_formatting_only(original: str, formatted: str) -> FormatValidation:
     layout_problem = find_layout_problem(cleaned)
     layout_clean = layout_problem is None
 
-    print(f"ORIGINAL  : {original_canon}")
-    print(f"FORMATTED : {formatted_canon}")
+    result = None
+    #print(f"ORIGINAL  : {original_canon}")
+    #print(f"FORMATTED : {formatted_canon}")
 
     if not text_equivalent:
-        return FormatValidation(
+        result = FormatValidation(
             ok=False,
             text_equivalent=False,
             layout_clean=layout_clean,
             reason="Output changed letters/words after removing punctuation/case/spacing.",
             cleaned_output=cleaned,
         )
-
-    if not layout_clean:
-        return FormatValidation(
+    elif not layout_clean:
+        result = FormatValidation(
             ok=False,
             text_equivalent=True,
             layout_clean=False,
             reason=layout_problem or "Output layout is not clean.",
             cleaned_output=cleaned,
         )
+    else:
+        result = FormatValidation(
+            ok=True,
+            text_equivalent=True,
+            layout_clean=True,
+            reason="OK",
+            cleaned_output=cleaned,
+        )
 
-    return FormatValidation(
-        ok=True,
-        text_equivalent=True,
-        layout_clean=True,
-        reason="OK",
-        cleaned_output=cleaned,
+    return result
+
+from typing import Iterable
+
+_DOT = "<DOT>"
+
+ABBREVIATIONS = {
+    # English
+    "mr.", "mrs.", "ms.", "dr.", "prof.", "sr.", "jr.",
+    "e.g.", "i.e.", "etc.", "vs.", "approx.", "fig.",
+    # Dutch-ish
+    "dhr.", "mevr.", "mw.", "m.a.w.", "bijv.", "enz.",
+    # Russian-ish
+    "т.е.", "т.д.", "т.п.", "т.к.", "г.", "ул.",
+}
+
+
+def protect_dots(text: str) -> str:
+    # URLs / domains
+    text = re.sub(
+        r"\b(?:https?://)?(?:www\.)?[\w.-]+\.[a-zA-Z]{2,}(?:/\S*)?",
+        lambda m: m.group(0).replace(".", _DOT),
+        text,
     )
+
+    # Decimal numbers: 3.14
+    text = re.sub(
+        r"(?<=\d)\.(?=\d)",
+        _DOT,
+        text,
+    )
+
+    # Initials: J. R. R. Tolkien
+    text = re.sub(
+        r"\b(?:[A-ZА-ЯЁ]\.){1,}",
+        lambda m: m.group(0).replace(".", _DOT),
+        text,
+    )
+
+    # Known abbreviations
+    for abbr in sorted(ABBREVIATIONS, key=len, reverse=True):
+        pattern = re.compile(re.escape(abbr), re.IGNORECASE)
+        text = pattern.sub(lambda m: m.group(0).replace(".", _DOT), text)
+
+    return text
+
+
+def split_sentences(text: str) -> list[str]:
+    """
+    Split Whisper .text into sentence-like units.
+    """
+    text = text.strip()
+    if not text:
+        return []
+
+    # Normalize whitespace.
+    text = re.sub(r"\s+", " ", text)
+
+    # Protect some specific dot-containing patterns replacing dots there with the special token.
+    protected = protect_dots(text)
+
+    # Capture sentence-ending punctuation plus optional closing quote/bracket.
+    pattern = re.compile(
+        r'([.!?…]+["\'”’)\]]*)\s+(?=[A-ZА-ЯЁ0-9"\'“‘(\[])'
+    )
+
+    parts = []
+    start = 0
+
+    for match in pattern.finditer(protected):
+        end = match.end(1)  # keep punctuation/quote/bracket in sentence
+        parts.append(protected[start:end])
+        start = match.end()  # skip whitespace
+
+    parts.append(protected[start:])
+
+    # Recover protected dots.
+    sentences = [
+        capitalize_first(part.replace(_DOT, ".").strip())
+        for part in parts
+        if part.strip()
+    ]
+
+    return sentences
 
 
 def extract_txt(file_path: str) -> None:
@@ -371,11 +447,10 @@ def extract_txt(file_path: str) -> None:
 
     # Original text is in .text (used for validation) but we process .segments.
     input_text = data.get("text", "")
-    asr_segments = data.get("segments", [])
+    sentences = split_sentences(input_text)
+    formatted_result = process_transcript(sentences)
 
-    formatted_result = process_transcript(asr_segments)
-
-    print("\n--- FINAL RAW OUTPUT ---")
+    print("\n--- FINAL OUTPUT ---")
     print(formatted_result)
     print("--------------------------------------------------\n\n")
 
