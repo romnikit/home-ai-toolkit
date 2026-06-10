@@ -43,6 +43,14 @@ def run_whisper(path: Path) -> None:
         result = mlx_whisper.transcribe(
             str(path),
             path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
+            #path_or_hf_repo="mlx-community/whisper-large-v3-mlx",
+            word_timestamps=False,
+            condition_on_previous_text=False,
+            temperature=(0.0, 0.2, 0.4, 0.6),
+            compression_ratio_threshold=2.4,
+            logprob_threshold=-1.0,
+            no_speech_threshold=0.6,
+
             verbose=False
         )
 

@@ -1,5 +1,5 @@
 
-# whisper-mps based media scanner.
+# whisper-mlx based media scanner.
 
 ## Needed tool to be installed.
 
@@ -10,5 +10,5 @@
     1. These components are just components.
        Please look into `../pipelines` for the complete pipeline example.
 
-       But here number of `./setup-env-*.sh` is provided for various purposes.
+       But here we provide relevant `./setup-env-*.sh` scripts.
        These script created environments under ~/.pyenv/envs/*
