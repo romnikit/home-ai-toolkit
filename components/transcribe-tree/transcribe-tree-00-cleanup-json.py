@@ -41,8 +41,6 @@ def process_file(file_path: str) -> None:
     txt_path = f"{base_name}.txt"
 
     # Here I may later add better logics.
-    Path(txt_path).unlink(missing_ok=True)
-    # Here I may later add better logics.
     Path(json_path).unlink(missing_ok=True)
 
 
