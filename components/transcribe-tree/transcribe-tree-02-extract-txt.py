@@ -12,6 +12,11 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
+# Please bear in mind, Ollama must be installed to do this.
+#
+# brew install ollama
+#
+
 # Gemma 4 (4b network) is considered the best for now.
 MODEL_NAME = 'gemma4:e4b'
 
