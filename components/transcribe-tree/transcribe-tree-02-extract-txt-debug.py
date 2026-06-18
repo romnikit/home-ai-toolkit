@@ -99,7 +99,33 @@ def ensure_model(model_name: str):
 # ------------------------------------------------
 #
 
-default_system_prompt_debug = """
+default_system_prompt_old = """
+You are given transcribed input text as numbered lines.
+Your ONLY job is to detect logical pragraphs in this text and point their LAST lines by their numbers.
+The last paragraph ending with the last input text line must not be reported.
+CRITICAL RULES:
+- Do not select lines unless each truly ends a separate paragraph.
+- For each detected paragraph end output ONE line having the following format:
+    <number>: <explanation>
+  where <numbe> is a last paragraph line number and <explanation> is a very short explanation, why this line was selected.
+- Output ONLY detected ending lines of the paragraphs.
+- Do not output anything other than required by previous rules.
+- If no paragraph detectet, output empty string.
+"""
+#For each paragraph detected output EXACTLY one line: integer (last paragraph line number) and a short decision explanation.
+#For each paragraph detected output EXACTLY one line: integer (last paragraph line number).
+
+default_system_prompt_02 = """
+Find paragraph breaks in numbered transcript lines.
+
+Output only numbers from the provided list.
+Each number means: this line is the last line of the paragraph.
+
+Output one number per line.
+If there are no paragraph breaks, output nothing.
+"""
+
+default_system_prompt = """
 Find paragraph breaks in numbered transcript lines.
 
 Output only numbers from the provided list.
@@ -111,15 +137,7 @@ Output one paragraph break per line with the following line format:
 If there are no paragraph breaks, output nothing.
 """
 
-default_system_prompt = """
-Find paragraph breaks in numbered transcript lines.
-
-Output only numbers from the provided list.
-Each number means: this line is the last line of the paragraph.
-Output one paragraph break per line.
-
-If there are no paragraph breaks, output nothing.
-"""
+#Output line format:
 
 def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> str:
     response = ollama.chat(
