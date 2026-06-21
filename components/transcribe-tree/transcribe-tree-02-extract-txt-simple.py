@@ -59,14 +59,15 @@ def walk(root: Path):
         d = stack.pop()
         try:
             with os.scandir(d) as it:
-                for entry in it:
-                    if entry.is_dir(follow_symlinks=False):
-                        stack.append(Path(entry.path))
-                    elif entry.is_file(follow_symlinks=False):
-                        yield Path(entry.path)
-        except PermissionError:
-            continue
-        except FileNotFoundError:
+                entries = sorted(it, key=lambda e: e.name, reverse=True)
+
+            for entry in entries:
+                if entry.is_dir(follow_symlinks=False):
+                    stack.append(Path(entry.path))
+                elif entry.is_file(follow_symlinks=False):
+                    yield Path(entry.path)
+
+        except (PermissionError, FileNotFoundError):
             continue
 
 def process_tree(root: str) -> None:
