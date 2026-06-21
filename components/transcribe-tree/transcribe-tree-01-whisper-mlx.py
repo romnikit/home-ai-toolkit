@@ -5,6 +5,7 @@ import json
 import mlx_whisper
 import mlx.core as mx
 import os
+from collections import deque
 from pathlib import Path
 
 # List of the extensions to include (only known to be supported media types).
@@ -75,19 +76,19 @@ def run_whisper(path: Path) -> None:
         mx.clear_cache()
         gc.collect()
 
-
 def walk(root: Path):
     """Fast scandir-based recursion, yields file Paths."""
     stack = [root]
+    queue = deque([root])
     while stack:
-        d = stack.pop()
+        d = queue.popleft()
         try:
             with os.scandir(d) as it:
-                entries = sorted(it, key=lambda e: e.name, reverse=True)
+                entries = sorted(it, key=lambda e: e.name, reverse=False)
 
             for entry in entries:
                 if entry.is_dir(follow_symlinks=False):
-                    stack.append(Path(entry.path))
+                    queue.append(Path(entry.path))
                 elif entry.is_file(follow_symlinks=False):
                     yield Path(entry.path)
 
