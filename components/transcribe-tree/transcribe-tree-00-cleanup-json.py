@@ -48,7 +48,7 @@ def walk(root: Path):
     """Fast scandir-based recursion, yields file Paths."""
     stack = [root]
     queue = deque([root])
-    while stack:
+    while queue:
         d = queue.popleft()
         try:
             with os.scandir(d) as it:
