@@ -18,20 +18,16 @@ from dataclasses import dataclass
 # brew install ollama
 #
 
-# Gemma 4 (4b network) is considered the best for now.
-MODEL_NAME = 'gemma4:e4b'
+# For now 7b non-thinking qwen 2.5 looks like local optimum for our task.
+MODEL_NAME = 'qwen2.5:7b'
 
 # --- CONFIGURATION ---
-#MODEL_NAME = "qwen2.5:1.5b"
 #MODEL_NAME = 'qwen2.5:7b'
-#MODEL_NAME = 'llama3.2:3b'
+#MODEL_NAME = 'qwen2.5:14b'
 #MODEL_NAME = 'llama3.1:8b'
 #MODEL_NAME = 'gemma3:4b'
 #MODEL_NAME = 'gemma4:e4b'
 #MODEL_NAME = 'gemma:7b'
-#MODEL_NAME = 'mistral:7b'
-#MODEL_NAME = 'mistral-nemo:12b'
-#MODEL_NAME = 'phi3:14b'
 
 
 # Translation of transcribe-tree-02-extract-txt.sh (phase 2)
@@ -105,26 +101,11 @@ def ensure_model(model_name: str):
 # ------------------------------------------------
 #
 
-default_system_prompt_debug = """
-Find paragraph breaks in numbered transcript lines.
-
-Output only numbers from the provided list.
-Each number means: this line is the last line of the paragraph.
-Output one paragraph break per line with the following line format:
-
-<number>: <short reason>
-
-If there are no paragraph breaks, output nothing.
-"""
-
 default_system_prompt = """
 Find paragraph breaks in numbered transcript lines.
-
-Output only numbers from the provided list.
-Each number means: this line is the last line of the paragraph.
-Output one paragraph break per line.
-
-If there are no paragraph breaks, output nothing.
+Result must be a list of the numbers of the lines that can be the last lines of the paragraph.
+Format output as one-line comma-separated list of numbers with square brackets.
+Do not generate any output.
 """
 
 def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> str:
@@ -137,11 +118,10 @@ def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> s
         options={
             'temperature': 0.0,      # Absolute determinism (prevents creative writing)
         },
+        think=False,
         stream=False
     )
-    # think=False
     return response['message']['content']
-    #return json.loads(response['message']['content'])
 
 # Capitalize first letter of the string.
 def capitalize_first(s: str) -> str:
@@ -209,24 +189,22 @@ def process_transcript(raw_segments: list):
             numbered_phrases_text = "\n".join(prompt_lines)
 
             # 4. Call LLM to get paragraph break indices
-            print(f"Processing window of {len(current_buffer)} sentence(s)...")
-            print(f"<- REQUEST:\n{numbered_phrases_text}\n--------\n")
+            print(f"Processing window of {len(current_buffer)} sentence(s)...\n--------")
+            print(f"\n<- LLM REQUEST:\n{numbered_phrases_text}\n--------")
             model_output = ask_llm_for_breaks(numbered_phrases_text)
-            print(f"-> RESPONSE:\n{model_output}\n--------\n")
+            print(f"-> LLM RESPONSE: {model_output}\n--------")
 
             # 5. Filter and validate indices returned by LLM
-            valid_breaks = sorted([int(num) for num in re.findall(r"^(\d+)", model_output, re.MULTILINE)])
-
             valid_breaks = sorted(
                 int(num)
-                for num in re.findall(r"^(\d+)", model_output, re.MULTILINE)
+                for num in json.loads(model_output)
                 if int(num) < len(prompt_lines)
             )
-            print(f"DETECTED BREAKS: {valid_breaks}")
+            print(f"-> DETECTED BREAKS: {valid_breaks}")
         else:
             # If we did not get anything new, write out the rest.
             valid_breaks = [len(current_buffer)]
-            print(f"LAST TEXT PARAGRAPH: {valid_breaks}")
+            print(f"LAST PARAGRAPH: {valid_breaks} line(s)")
 
         # 6. Slice the buffer into paragraphs based on the indices
         start_seg_idx = 0
