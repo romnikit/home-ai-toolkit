@@ -148,12 +148,10 @@ def format_paragraph(phrase_list):
 
     return full_text
 
-def process_transcript(raw_segments: list):
+def process_transcript(segments: list):
 
     final_output = ""
     current_buffer = []
-
-    segments = raw_segments
 
     print(f"Processing {len(segments)} sentences...")
 
@@ -189,8 +187,8 @@ def process_transcript(raw_segments: list):
             numbered_phrases_text = "\n".join(prompt_lines)
 
             # 4. Call LLM to get paragraph break indices
-            print(f"Processing window of {len(current_buffer)} sentence(s)...\n--------")
-            print(f"\n<- LLM REQUEST:\n{numbered_phrases_text}\n--------")
+            print(f"=== [{idx}/{len(segments)}] Window of {len(current_buffer)} sentence(s)...............")
+            print(f"<- LLM REQUEST:\n{numbered_phrases_text}\n--------")
             model_output = ask_llm_for_breaks(numbered_phrases_text)
             print(f"-> LLM RESPONSE: {model_output}\n--------")
 
@@ -434,7 +432,7 @@ def split_sentences(text: str) -> list[str]:
     return sentences
 
 
-def extract_txt(file_path: str) -> None:
+def process_file(file_path: str) -> None:
     # Equivalent target: python -m json.tool --no-ensure-ascii < base.json | jq -r '.text' > base.txt
     base_name = file_path.rsplit(".", 1)[0]
     json_path = f"{base_name}.json"
@@ -529,7 +527,10 @@ def process_tree(root: str) -> None:
                         print()
                         do_new_line = False
                     print(f"DO : Extract .txt for '{file_str}' ...")
-                    extract_txt(file_str)
+                    try:
+                        process_file(file_str)
+                    except Exception as e:
+                        print(f"❌ Failed to process '{file_str}': {e}")
             else:
                 sys.stdout.write("x")  # Media but no .json
                 sys.stdout.flush()
