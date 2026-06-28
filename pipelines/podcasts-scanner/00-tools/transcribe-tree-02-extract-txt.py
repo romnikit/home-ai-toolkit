@@ -104,8 +104,8 @@ def ensure_model(model_name: str):
 default_system_prompt = """
 Find paragraph breaks in numbered transcript lines.
 Result must be a list of the numbers of the lines that can be the last lines of the paragraph.
-Format output as one-line comma-separated list of numbers with square brackets.
-Do not generate any output.
+Format output as one-line comma-separated list of numbers.
+Do not generate any other output.
 """
 
 def ask_llm_for_breaks(raw_input: str, system_prompt=default_system_prompt) -> str:
@@ -194,9 +194,9 @@ def process_transcript(segments: list):
 
             # 5. Filter and validate indices returned by LLM
             valid_breaks = sorted(
-                int(num)
-                for num in json.loads(model_output)
-                if int(num) < len(prompt_lines)
+                n
+                for x in model_output.split(",")
+                if (t := x.strip()) and (n := int(t)) < len(prompt_lines)
             )
             print(f"-> DETECTED BREAKS: {valid_breaks}")
         else:
