@@ -11,5 +11,9 @@ pyenv shell $PYTHON_VERSION
 python3 -m venv $PYTHON_PATH
 source "$PYTHON_PATH/bin/activate"
 
+# MLX whisper, Ollama for post-processing.
 pip install -U pip mlx-whisper
 pip install -U ollama
+
+# Also this may be needed.
+# brew services restart ollama

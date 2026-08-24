@@ -14,3 +14,6 @@ source "$PYTHON_PATH/bin/activate"
 # MLX whisper, Ollama for post-processing.
 pip install -U pip mlx-whisper
 pip install -U ollama
+
+# Also this may be needed.
+# brew services restart ollama
