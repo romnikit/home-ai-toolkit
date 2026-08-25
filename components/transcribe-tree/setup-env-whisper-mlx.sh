@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Needed Homebrew packages.
-brew install pyenv ffmpeg xz
+brew install -y pyenv ffmpeg xz
 
 # Whisper-mps actually require Python >= 3.10.
 PYTHON_VERSION="3.14.5"
